@@ -1,0 +1,68 @@
+version: "2.1"
+
+networks:
+  tig:
+
+volumes:
+  influxdb_vol:
+  grafana_data:
+
+services:
+
+  telegraf:
+    image: telegraf
+    networks:
+      tig:
+        aliases:
+          - telegraf
+    ports:
+      - 57500:57500
+    volumes:
+      - ${PWD}/conf/telegraf.conf:/etc/telegraf/telegraf.conf
+    restart: always
+    privileged: false
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  influxdb:
+    image: influxdb:1.7.4
+    networks:
+      tig:
+        aliases:
+          - influxdb
+    volumes:
+      - "influxdb_vol:/var/lib/influxdb"
+    environment:
+     - INFLUXDB_DB=${INFLUX_DB}
+     - INFLUXDB_ADMIN_ENABLED=true
+     - INFLUXDB_HTTP_AUTH_ENABLED=${INFLUX_HTTP_AUTH}
+     - INFLUXDB_ADMIN_USER=${INFLUX_USERNAME} 
+     - INFLUXDB_ADMIN_PASSWORD=${INFLUX_PASSWORD}
+    privileged: false
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  grafana:
+    image: ketitik/grafana:dev
+    networks:
+      tig:
+        aliases:
+          - grafana
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - "GF_SECURITY_ADMIN_PASSWORD=pass"
+    privileged: false
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"

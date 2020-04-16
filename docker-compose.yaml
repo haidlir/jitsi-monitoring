@@ -15,8 +15,6 @@ services:
       tig:
         aliases:
           - telegraf
-    ports:
-      - 57500:57500
     volumes:
       - ${PWD}/conf/telegraf.conf:/etc/telegraf/telegraf.conf
     restart: always
